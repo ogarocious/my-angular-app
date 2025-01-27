@@ -1,30 +1,91 @@
-import { Component, OnInit } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ArtistIndexComponent } from './artist-index.component';
 import { ArtistService } from '../../services/artist.service';
-import { Artist } from '../../models/artist';
+import { HttpClientTestingModule } from '@angular/common/http/testing'; // For mocking HTTP requests
+import { of } from 'rxjs';
+import { SidebarComponent } from '../../shared/sidebar/sidebar.component';
+import { RouterTestingModule } from '@angular/router/testing';
 
-@Component({
-  selector: 'app-artist-index',
-  templateUrl: './artist-index.component.html',
-  styleUrls: ['./artist-index.component.scss'],
-})
-export class ArtistIndexComponent implements OnInit {
-  artists: Artist[] = []; // Array to store artists
+describe('ArtistIndexComponent', () => {
+  let component: ArtistIndexComponent;
+  let fixture: ComponentFixture<ArtistIndexComponent>;
+  let artistService: jasmine.SpyObj<ArtistService>;
 
-  constructor(private artistService: ArtistService) {}
+  const mockArtists = [
+    {
+      id: 1,
+      name: 'Jay-Z',
+      username: 'jayz',
+      totalStars: 5,
+      image_url: '/assets/jayz.png',
+    },
+    {
+      id: 2,
+      name: 'Kanye West',
+      username: 'kanyewest',
+      totalStars: 3,
+      image_url: '/assets/ye.png',
+    },
+  ];
 
-  ngOnInit(): void {
-    this.fetchArtists();
-  }
+  beforeEach(async () => {
+    const artistServiceSpy = jasmine.createSpyObj('ArtistService', [
+      'getArtists',
+    ]);
 
-  // Fetch the list of artists from the service
-  fetchArtists(): void {
-    this.artistService.getArtists().subscribe(
-      (data: Artist[]) => {
-        this.artists = data;
-      },
-      (error) => {
-        console.error('Error fetching artists:', error);
-      }
-    );
-  }
-}
+    await TestBed.configureTestingModule({
+      imports: [
+        HttpClientTestingModule, // Mock HTTP requests
+        RouterTestingModule, // Mock router
+        SidebarComponent, // Include standalone SidebarComponent
+      ],
+      declarations: [ArtistIndexComponent],
+      providers: [{ provide: ArtistService, useValue: artistServiceSpy }],
+    }).compileComponents();
+
+    artistService = TestBed.inject(
+      ArtistService
+    ) as jasmine.SpyObj<ArtistService>;
+    artistService.getArtists.and.returnValue(of(mockArtists)); // Mock getArtists() to return mock data
+
+    fixture = TestBed.createComponent(ArtistIndexComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges(); // Trigger Angular's change detection
+  });
+
+  it('should create the component', () => {
+    expect(component).toBeTruthy();
+  });
+
+  it('should fetch artists on initialization', () => {
+    expect(component.artists.length).toBe(mockArtists.length);
+    expect(component.artists[0].name).toBe('Jay-Z');
+  });
+
+  it('should open the sidebar with selected artist', () => {
+    const artist = mockArtists[0];
+    component.openSidebar(artist);
+
+    expect(component.isSidebarOpen).toBeTrue();
+    expect(component.selectedArtist).toEqual(artist);
+  });
+
+  it('should close the sidebar', () => {
+    component.closeSidebar();
+
+    expect(component.isSidebarOpen).toBeFalse();
+    expect(component.selectedArtist).toBeNull();
+  });
+
+  it('should handle image errors and set default image', () => {
+    const artist = {
+      id: 1,
+      name: 'Test Artist',
+      username: 'test',
+      totalStars: 0,
+    };
+    component.handleImageError(artist);
+
+    // expect(artist.image_url).toBe('/assets/default-image.png');
+  });
+});

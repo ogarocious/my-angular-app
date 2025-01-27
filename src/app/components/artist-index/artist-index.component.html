@@ -1,1 +1,39 @@
-<p>artist-index works!</p>
+<div class="p-8">
+  <!-- Back to Home Button -->
+  <button
+    class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-300 mb-6"
+    routerLink="/home"
+  >
+    Back to Home
+  </button>
+
+  <!-- Artists Grid -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+    <div
+      *ngFor="let artist of artists"
+      class="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer"
+      (click)="openSidebar(artist)"
+    >
+      <!-- Artist Image -->
+      <img
+        [src]="artist.image_url"
+        [alt]="artist.name"
+        class="w-full h-48 object-cover object-top transition-transform duration-300 ease-in-out transform hover:scale-105"
+        (error)="handleImageError(artist)"
+      />
+
+      <!-- Artist Details -->
+      <div class="p-4">
+        <h2 class="text-lg font-semibold text-gray-800">{{ artist.name }}</h2>
+        <p class="text-sm text-gray-600">Stars: {{ artist.totalStars }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sidebar -->
+  <app-sidebar
+    [isOpen]="isSidebarOpen"
+    [artist]="selectedArtist"
+    (close)="closeSidebar()"
+  ></app-sidebar>
+</div>

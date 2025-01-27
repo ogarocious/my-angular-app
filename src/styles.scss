@@ -1,4 +1,47 @@
-/* You can add global styles to this file, and also import other style files */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+/* styles.scss */
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap");
+
+html,
+body {
+  height: 100%;
+  font-family: "Poppins", sans-serif !important;
+}
+
+.mat-mdc-snack-bar-label {
+  font-family: "Poppins", sans-serif !important;
+  font-size: 1.2rem !important;
+  line-height: 1.8rem;
+  font-weight: 600 !important;
+  padding: 16px 24px;
+  border-radius: 0rem;
+  background-color: #03bd4a;
+  color: #fff;
+  text-align: center;
+  padding-right: 1.5rem;
+}
+
+/* Close Button Styles */
+.mat-mdc-snack-bar-actions .mat-mdc-snack-bar-action {
+  font-family: "Poppins", sans-serif !important;
+  font-size: 1rem !important;
+  font-weight: 500;
+  background-color: #323232 !important; /* Dark background for contrast */
+  color: #ffffff !important; /* White text */
+  border-radius: 4px;
+  padding: 8px 16px;
+  text-transform: uppercase; /* Optional: Makes "Close" uppercase */
+  transition: all 0.3s ease-in-out;
+}
+
+html,
+body {
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
