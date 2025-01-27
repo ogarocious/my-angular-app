@@ -53,23 +53,36 @@
         </div>
       </app-modal>
 
-      <h2 class="text-xl font-bold mt-4">{{ artist.name }}</h2>
-      <p class="text-gray-600">Total Stars: {{ artist.totalStars }}</p>
+      <h2 class="text-3xl font-bold mt-2">{{ artist.name }}</h2>
+      <p class="text-gray-600">⭐ Total Stars: {{ artist.totalStars }}</p>
 
-      <div *ngIf="recentSupporters.length > 0" class="mt-6">
-        <h3 class="text-lg font-bold my-4">Recent Supporters</h3>
-        <div *ngFor="let supporter of recentSupporters" class="supporter-card">
-          <div class="supporter-info">
-            <div class="supporter-name">
-              {{ supporter.supporterName || "Someone" }} bought
-              {{ supporter.starsPurchased }} stars
-            </div>
-            <div *ngIf="supporter.message" class="supporter-message">
-              "{{ supporter.message }}"
-            </div>
+      <div *ngIf="recentSupporters.length > 0; else noSupporters">
+        <h3 class="text-lg font-bold my-2">Recent Supporters</h3>
+        <div
+          *ngFor="let supporter of recentSupporters"
+          class="flex items-center justify-between p-4 bg-gray-100 rounded-lg mb-2 shadow-md"
+        >
+          <div>
+            <p class="text-md font-semibold">
+              {{ supporter.supporterName || "Someone" }}
+            </p>
+            <p class="text-md text-gray-600">
+              {{ supporter.message || "No message" }}
+            </p>
+          </div>
+          <div>
+            <span class="text-2xl font-bold text-orange-500">
+              ⭐ {{ supporter.starsPurchased }}
+            </span>
           </div>
         </div>
       </div>
+
+      <ng-template #noSupporters>
+        <p class="text-gray-600 text-sm italic my-2">
+          No recent supporters yet.
+        </p>
+      </ng-template>
     </div>
   </div>
 </div>

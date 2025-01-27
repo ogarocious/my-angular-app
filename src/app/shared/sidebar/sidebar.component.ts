@@ -53,7 +53,11 @@ export class SidebarComponent {
 
     this.artistService.getStarPurchasesByArtist(this.artist.id).subscribe(
       (data) => {
-        this.recentSupporters = data; // Update the supporters list
+        this.recentSupporters = data.sort(
+          (a, b) =>
+            new Date(b.purchaseDate).getTime() -
+            new Date(a.purchaseDate).getTime()
+        ); // Update the supporters list
         this.errorMessage = null;
 
         const totalStars = data.reduce(
