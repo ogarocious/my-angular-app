@@ -11,17 +11,17 @@
   [style.width]="sidebarWidth"
   [class.translate-x-full]="!isOpen"
 >
-  <div class="p-6">
+  <div class="h-full overflow-y-auto p-6">
     <button class="text-red-500 font-bold text-lg" (click)="closeSidebar()">
       Close
     </button>
 
     <div *ngIf="artist">
-      <div class="my-10 shadow-lg rounded-lg">
+      <div class="my-6">
         <img
           [src]="artist.image_url || '/assets/MRNEOKIZ_2023.png'"
           [alt]="artist.name"
-          class="w-full object-cover object-top rounded-lg shadow"
+          class="w-50 aspect-[4/3] object-cover rounded-lg shadow"
           (error)="artist.image_url = '/assets/default-image.png'"
         />
       </div>
@@ -39,6 +39,7 @@
         [isOpen]="isModalOpen"
         [artist]="artist"
         (isOpenChange)="isModalOpen = $event"
+        (purchaseCompleted)="refreshSupporters()"
       >
         <div class="p-6">
           <h2 class="text-2xl font-bold">Support {{ artist?.name }}</h2>
@@ -53,8 +54,22 @@
       </app-modal>
 
       <h2 class="text-xl font-bold mt-4">{{ artist.name }}</h2>
-      <p class="text-gray-600">Username: {{ artist.username }}</p>
       <p class="text-gray-600">Total Stars: {{ artist.totalStars }}</p>
+
+      <div *ngIf="recentSupporters.length > 0" class="mt-6">
+        <h3 class="text-lg font-bold my-4">Recent Supporters</h3>
+        <div *ngFor="let supporter of recentSupporters" class="supporter-card">
+          <div class="supporter-info">
+            <div class="supporter-name">
+              {{ supporter.supporterName || "Someone" }} bought
+              {{ supporter.starsPurchased }} stars
+            </div>
+            <div *ngIf="supporter.message" class="supporter-message">
+              "{{ supporter.message }}"
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>

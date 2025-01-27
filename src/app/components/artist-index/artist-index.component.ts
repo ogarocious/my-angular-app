@@ -18,28 +18,56 @@ export class ArtistIndexComponent implements OnInit {
     username: string;
     totalStars: number;
     image_url?: string;
+    starsPurchased?: number;
   }[] = [];
   isSidebarOpen: boolean = false;
   selectedArtist: any = null;
+  recentSupporters: any[] = []; // Stores the most recent supporters
 
   constructor(private artistService: ArtistService, private router: Router) {}
 
-  ngOnInit(): void {
-    this.fetchArtists();
+  onStarsPurchased(event: { artistId: number; starsPurchased: number }): void {
+    const artist = this.artists.find((artist) => artist.id === event.artistId);
+    if (artist) {
+      artist.totalStars += event.starsPurchased;
+    }
+
+    if (this.selectedArtist?.id === event.artistId) {
+      this.selectedArtist.totalStars =
+        artist?.totalStars || this.selectedArtist.totalStars;
+    }
+
+    this.fetchArtistsAndTotals();
   }
 
-  fetchArtists(): void {
+  ngOnInit(): void {
+    this.fetchArtistsAndTotals();
+  }
+
+  fetchArtistsAndTotals(): void {
+    // Fetch artists
     this.artistService.getArtists().subscribe(
-      (data) => {
-        // Map artist data to include image URLs
-        this.artists = data.map((artist) => ({
-          ...artist,
-          image_url: this.getArtistImage(artist.username),
-        }));
+      (artists) => {
+        // Fetch star totals
+        this.artistService.getArtistStarTotals().subscribe(
+          (totals) => {
+            console.log('Star Totals from API:', totals);
+
+            // Merge totals into artists and include image URLs
+            this.artists = artists.map((artist) => {
+              const total =
+                totals.find((t) => t.artistId === artist.id)?.totalStars || 0;
+              return {
+                ...artist,
+                totalStars: total, // Default totalStars plus purchases
+                image_url: this.getArtistImage(artist.username), // Add artist image
+              };
+            });
+          },
+          (error) => console.error('Error fetching star totals:', error)
+        );
       },
-      (error) => {
-        console.error('Error fetching artists:', error);
-      }
+      (error) => console.error('Error fetching artists:', error)
     );
   }
 
@@ -67,8 +95,8 @@ export class ArtistIndexComponent implements OnInit {
 
   openSidebar(artist: any): void {
     console.log('Opening sidebar for artist:', artist);
-    this.selectedArtist = artist;
-    this.isSidebarOpen = true;
+    this.selectedArtist = artist; // Pass the selected artist to the sidebar
+    this.isSidebarOpen = true; // Open the sidebar
   }
 
   closeSidebar(): void {

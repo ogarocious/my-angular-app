@@ -18,6 +18,11 @@ export class ModalComponent {
   @Input() artist: any = {}; // Artist data passed from the parent component
   @Output() isOpenChange = new EventEmitter<boolean>(); // Two-way binding for isOpen
   @Output() close = new EventEmitter<void>(); // Event to notify parent to close modal
+  @Output() starsPurchased = new EventEmitter<{
+    artistId: number;
+    starsPurchased: number;
+  }>();
+  @Output() purchaseCompleted = new EventEmitter<void>(); // Event emitted on purchase completion
 
   purchaseForm: FormGroup;
 
@@ -61,11 +66,15 @@ export class ModalComponent {
   onSubmit(): void {
     if (this.purchaseForm.valid) {
       const purchaseDetails = {
-        artistID: this.artist.id,
-        ...this.purchaseForm.value,
+        artistId: this.artist.id,
+        starsPurchased: this.purchaseForm.value.stars,
+        supporterName: this.purchaseForm.value.name,
+        message: this.purchaseForm.value.message,
         amountPaid: this.purchaseForm.value.stars * 50,
         purchaseDate: new Date(),
       };
+
+      this.starsPurchased.emit(purchaseDetails);
 
       console.log('Purchase Details:', purchaseDetails);
 
@@ -76,7 +85,7 @@ export class ModalComponent {
             `Thank you for supporting ${this.artist.name} with ${this.purchaseForm.value.stars} stars!`,
             'Close',
             {
-              duration: 100000,
+              duration: 10000,
               horizontalPosition: 'center',
               verticalPosition: 'top',
               panelClass: ['custom-snackbar'],
@@ -85,6 +94,7 @@ export class ModalComponent {
 
           // Reset the form and close the modal
           this.purchaseForm.reset();
+          this.purchaseCompleted.emit();
           this.closeModal();
         },
         (error) => {

@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ModalComponent } from '../../components/modal/modal.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { ArtistService } from '../../services/artist.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -17,14 +18,91 @@ export class SidebarComponent {
 
   @Output() close = new EventEmitter<void>(); // Emits an event to close the sidebar
   @Output() isOpenChange = new EventEmitter<boolean>(); // Emits changes in `isOpen` for two-way binding
+  @Output() starsPurchased = new EventEmitter<{
+    artistId: number;
+    starsPurchased: number;
+  }>();
 
   starsSelected: number = 0; // Tracks the selected number of stars
   supporterName: string = ''; // Stores the supporter name input
   supporterMessage: string = ''; // Stores the supporter message input
+  recentSupporters: any[] = []; // Stores the most recent supporters
+  errorMessage: string | null = null;
 
   isModalOpen: boolean = false; // Controls modal visibility
 
-  constructor(private snackBar: MatSnackBar) {}
+  constructor(
+    private artistService: ArtistService,
+    private snackBar: MatSnackBar
+  ) {}
+
+  handleStarsPurchase(starsPurchased: number): void {
+    this.starsPurchased.emit({
+      artistId: this.artist.id,
+      starsPurchased,
+    });
+
+    if (this.artist) {
+      this.artist.totalStars += starsPurchased;
+    }
+
+    this.refreshSupporters();
+  }
+  refreshSupporters(): void {
+    if (!this.artist) return;
+
+    this.artistService.getStarPurchasesByArtist(this.artist.id).subscribe(
+      (data) => {
+        this.recentSupporters = data; // Update the supporters list
+        this.errorMessage = null;
+
+        const totalStars = data.reduce(
+          (sum, purchase) => sum + purchase.starsPurchased,
+          0
+        );
+
+        this.artist.totalStars = totalStars;
+      },
+      (error) => {
+        if (error.status === 404) {
+          console.warn(
+            `No recent supporters found for artist: ${this.artist.name}`
+          );
+          this.recentSupporters = [];
+          this.errorMessage = 'No recent supporters yet.';
+        } else {
+          console.error('Error fetching star purchases:', error);
+          this.errorMessage = 'Failed to load recent supporters.';
+        }
+      }
+    );
+  }
+
+  ngOnChanges(): void {
+    if (this.artist && this.isOpen) {
+      // Fetch recent supporters for the artist
+      this.artistService.getStarPurchasesByArtist(this.artist.id).subscribe(
+        (data) => {
+          this.recentSupporters = data; // Update supporters list
+          this.errorMessage = null;
+        },
+        (error) => {
+          if (error.status === 404) {
+            // Handle case where no purchases are found
+            console.warn(
+              `No recent supporters found for artist: ${this.artist.name}`
+            );
+            this.recentSupporters = [];
+            this.errorMessage = 'No recent supporters yet.';
+          } else {
+            // Handle other errors
+            console.error('Error fetching star purchases:', error);
+            this.errorMessage = 'Failed to load recent supporters.';
+          }
+        }
+      );
+    }
+  }
 
   /**
    * Opens the modal.
@@ -73,19 +151,6 @@ export class SidebarComponent {
       );
       return;
     }
-
-    // Build the purchase details
-    const purchaseDetails = {
-      artistId: this.artist.id,
-      starsPurchased: this.starsSelected,
-      supporterName: this.supporterName,
-      supporterMessage: this.supporterMessage,
-      amountPaid: this.starsSelected * 50,
-      purchaseDate: new Date(),
-    };
-
-    // Log the purchase details (or send them to the server if applicable)
-    console.log('Purchase Details:', purchaseDetails);
 
     // Display a success message
     this.snackBar.open(

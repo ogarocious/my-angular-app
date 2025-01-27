@@ -20,6 +20,14 @@ export class ArtistService {
     return this.http.get<any[]>(`${this.starPurchaseUrl}`);
   }
 
+  getArtistStarTotals(): Observable<
+    { artistId: number; totalStars: number }[]
+  > {
+    return this.http.get<{ artistId: number; totalStars: number }[]>(
+      `${this.starPurchaseUrl}/totals`
+    );
+  }
+
   getStarPurchasesByArtist(artistId: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.starPurchaseUrl}/artist/${artistId}`);
   }

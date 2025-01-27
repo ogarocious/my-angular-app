@@ -4,6 +4,34 @@
   z-index: 50;
 }
 
+.recent-supporters {
+  max-height: 300px; // Limit height and make it scrollable
+  overflow-y: auto;
+}
+
+.supporter-card {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.supporter-info {
+  flex: 1;
+}
+
+.supporter-name {
+  font-weight: bold;
+}
+
+.supporter-message {
+  font-style: italic;
+  color: #555;
+}
+
 .overlay {
   z-index: 40;
   backdrop-filter: blur(40px);
