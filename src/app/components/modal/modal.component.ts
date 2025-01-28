@@ -4,7 +4,6 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ArtistService } from '../../services/artist.service';
-import { response } from 'express';
 
 @Component({
   selector: 'app-modal',
